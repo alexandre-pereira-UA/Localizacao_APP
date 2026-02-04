@@ -10,14 +10,11 @@ import pytz
 from datetime import datetime
 import ast
 
-# --- CONFIGURAÇÃO DA PÁGINA ---
 st.set_page_config(page_title="GeoFinder Pro", page_icon="🌍", layout="wide")
 
-# --- CARREGAMENTO DE FICHEIROS EXTERNOS ---
-
+# Ficheiros externos
 @st.cache_data
 def load_external_files():
-    # Carregar Categorias
     categorias_dict = {}
     lista_principais = []
     try:
@@ -31,29 +28,23 @@ def load_external_files():
                     if pai not in categorias_dict: categorias_dict[pai] = []
                     categorias_dict[pai].append(filho)
                     if pai not in lista_principais: lista_principais.append(pai)
-    except Exception as e:
-        st.error(f"Erro ao carregar categories.txt: {e}")
+    except: pass
 
-    # Carregar Moedas (usa o nome exato moedas.txt.txt)
     moedas_dict = {}
     try:
         with open('moedas.txt.txt', 'r', encoding="UTF-8") as f:
-            conteudo = f.read()
-            # Converte a string do dicionário em dicionário Python real
-            moedas_dict = ast.literal_eval(conteudo)
-    except Exception as e:
-        st.error(f"Erro ao carregar moedas.txt.txt: {e}")
+            moedas_dict = ast.literal_eval(f.read())
+    except: pass
 
     return categorias_dict, sorted(lista_principais), moedas_dict
 
-# Carregar dados globais
 CATS_DICT, PRINCIPAIS, MOEDAS_DATA = load_external_files()
 
-# --- FUNÇÕES DE SUPORTE ---
+# Funções de suporte
 
 def get_enriched_info(row):
-    """Calcula Hora Local, Moeda e Info do País"""
-    # 1. Hora Local
+    """Calcula Hora Local Real, Moeda e Info do País"""
+    # 1. Hora Local Real (AM/PM)
     try:
         tf = TimezoneFinder()
         tz_name = tf.timezone_at(lng=row['lon'], lat=row['lat'])
@@ -65,11 +56,9 @@ def get_enriched_info(row):
     except:
         row['Hora Local'] = "N/A"
 
-    # 2. Moeda (Busca no ficheiro carregado)
+    # 2. Moeda (Ficheiro + Fallback)
     pais_upper = str(row.get('País', '')).upper()
     row['Moeda'] = MOEDAS_DATA.get(pais_upper, "N/A")
-    
-    # Fallback se não estiver no ficheiro
     if row['Moeda'] == "N/A":
         try:
             c_res = pycountry.countries.search_fuzzy(row.get('País', ''))[0]
@@ -88,14 +77,19 @@ def buscar_locais(lon, lat, dist, categoria, limite):
     try:
         api_key = st.secrets["GEOAPIFY_KEY"]
     except:
-        st.error("Chave API não encontrada nos Secrets!")
-        return []
+        st.error("ERRO: Configura a GEOAPIFY_KEY nos Segredos do Streamlit!")
+        return None
 
     url = f"https://api.geoapify.com/v2/places?categories={categoria}&filter=circle:{lon},{lat},{dist}&bias=proximity:{lon},{lat}&limit={limite}&apiKey={api_key}"
     
     try:
         response = requests.get(url)
-        features = response.json().get("features", [])
+        data = response.json()
+        features = data.get("features", [])
+        
+        if not features:
+            return []
+
         res_list = []
         for item in features:
             p = item.get("properties", {})
@@ -114,15 +108,18 @@ def buscar_locais(lon, lat, dist, categoria, limite):
     except:
         return []
 
-# --- INTERFACE STREAMLIT ---
+# Interface
 
-st.title("🌍 GeoFinder Pro")
+st.title("🌍 GeoFinder Pro: Localização e Informação Real")
 
-if 'dados' not in st.session_state: st.session_state.dados = None
+if 'dados' not in st.session_state:
+    st.session_state.dados = None
+if 'aviso_erro' not in st.session_state:
+    st.session_state.aviso_erro = False
 
-# Sidebar
+# Barra Lateral
 with st.sidebar:
-    st.header("📍 Parâmetros")
+    st.header("📍 Configurações")
     lat_in = st.number_input("Latitude", value=38.7071, format="%.6f")
     lon_in = st.number_input("Longitude", value=-9.1355, format="%.6f")
     raio = st.number_input("Raio (Metros)", value=1000)
@@ -132,18 +129,30 @@ with st.sidebar:
     if PRINCIPAIS:
         escolha_pai = st.selectbox("Categoria", PRINCIPAIS)
         categoria_final = escolha_pai
-        if st.checkbox("Sub-categoria"):
+        if st.checkbox("Sub-categoria específica"):
             sub = st.selectbox("Detalhe", CATS_DICT.get(escolha_pai, []))
             categoria_final = f"{escolha_pai}.{sub}"
     else:
         categoria_final = "activity"
 
-if st.button("🔍 PESQUISAR"):
-    with st.spinner("A processar..."):
-        st.session_state.dados = buscar_locais(lon_in, lat_in, raio, categoria_final, limit)
-        st.session_state.pos = (lat_in, lon_in)
+# Botão de Pesquisa
+if st.button("🔍 PROCURAR LOCAIS"):
+    with st.spinner("A pesquisar e a calcular horários..."):
+        res = buscar_locais(lon_in, lat_in, raio, categoria_final, limit)
+        
+        if res: # Se encontrou resultados
+            st.session_state.dados = res
+            st.session_state.pos = (lat_in, lon_in)
+            st.session_state.aviso_erro = False
+        else: # Se a lista veio vazia ou erro
+            st.session_state.dados = None
+            st.session_state.aviso_erro = True
 
-# Resultados em Abas
+# Caso não encontre nada
+
+if st.session_state.aviso_erro:
+    st.warning("⚠️ Não foi possível encontrar o que queria com esses critérios. Tente aumentar a distância ou mudar a categoria.")
+
 if st.session_state.dados:
     df = pd.DataFrame(st.session_state.dados)
     st.success(f"Encontrados {len(df)} locais!")
@@ -155,16 +164,29 @@ if st.session_state.dados:
         st.dataframe(df[[c for c in cols if c in df.columns]], use_container_width=True)
 
     with tab2:
+        st.subheader("Visualização no Mapa")
         m = folium.Map(location=st.session_state.pos, zoom_start=14)
-        folium.Marker(st.session_state.pos, popup="Pesquisa", icon=folium.Icon(color='black', icon='home')).add_to(m)
+        
+        # Pin da Pesquisa
+        folium.Marker(st.session_state.pos, popup="Ponto de Pesquisa", icon=folium.Icon(color='black', icon='home')).add_to(m)
+        
+        # Pins dos Resultados
         for _, r in df.iterrows():
             folium.Marker(
                 [r['lat'], r['lon']],
-                popup=f"<b>{r['Nome']}</b><br>Hora: {r['Hora Local']}",
+                popup=f"<b>{r['Nome']}</b><br>Hora: {r['Hora Local']}<br>Moeda: {r['Moeda']}",
                 tooltip=r['Nome'],
                 icon=folium.Icon(color='red', icon='info-sign')
             ).add_to(m)
-        st_folium(m, use_container_width=True, height=500, key="mapa_final")
+        
+        st_folium(m, use_container_width=True, height=500, key="mapa_vFinal")
 
     with tab3:
-        st.download_button("📥 Baixar CSV", df.to_csv(index=False).encode('utf-8'), "geofinder_results.csv", "text/csv")
+        st.subheader("Download de Dados")
+        csv_buffer = df.to_csv(index=False).encode('utf-8')
+        st.download_button(
+            label="📥 Baixar Resultados (CSV)",
+            data=csv_buffer,
+            file_name='pesquisa_geofinder.csv',
+            mime='text/csv'
+        )

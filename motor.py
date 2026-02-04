@@ -9,13 +9,11 @@ import os
 
 # Função para carregar a API Key de forma segura
 def get_api_key():
-    # Tenta ler do ambiente ou podes colocar aqui manualmente apenas para teste local
-    # No entanto, recomendo usares o segredo do Streamlit se correres via Streamlit
     try:
         import streamlit as st
         return st.secrets["GEOAPIFY_KEY"]
     except:
-        return "682be55d456c44919e284b09e0a9b8d2" # Fallback manual
+        return "682be55d456c44919e284b09e0a9b8d2" 
 
 API_KEY = get_api_key()
 
