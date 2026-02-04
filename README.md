@@ -40,7 +40,12 @@ A aplicação é dinâmica e lê os seguintes ficheiros para funcionar:
 ### 1. Obter a API Key
 Este projeto utiliza a API da **Geoapify**.
 1. Cria uma conta gratuita em [Geoapify MyProjects](https://myprojects.geoapify.com/).
-2. Cria um novo projeto e copia a tua **API Key**.
+2. Cria uma nova pasta ".streamlit" (na pasta da aplicação) e cria um ficheiro "secrets.toml" a tua **API Key**.
+3. Coloca lá a tua key
+
+```bash
+GEOAPIFY_KEY = "tua_key"   
+```
 
 ### 2. Instalar Bibliotecas (CMD/Terminal)
 Executa o seguinte comando para instalar todas as dependências:
@@ -48,7 +53,6 @@ Executa o seguinte comando para instalar todas as dependências:
 ```bash
 pip install streamlit requests pandas folium streamlit-folium timezonefinder countryinfo pycountry pytz
 ```
-
 ---
 
 ## 💻 Como utilizar
