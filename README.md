@@ -25,6 +25,16 @@ A aplicação é dinâmica e lê os seguintes ficheiros para funcionar:
 
 ---
 
+## 📚 Tecnologias utilizadas
+
+- **Streamlit**: Interface Web.
+- **Folium**: Mapas interativos.
+- **Pandas**: Manipulação de dados e exportação CSV.
+- **Geoapify API**: Dados geográficos e locais.
+- **TimezoneFinder & Pytz**: Lógica de fuso horário e hora real.
+- **CountryInfo & Pycountry**: Dados estatísticos de países e moedas
+
+
 ## 🛠️ Instalação e Configuração
 
 ### 1. Obter a API Key
@@ -38,6 +48,27 @@ Executa o seguinte comando para instalar todas as dependências:
 ```bash
 pip install streamlit requests pandas folium streamlit-folium timezonefinder countryinfo pycountry pytz
 ```
+
+---
+
+## 💻 Como utilizar
+
+### Mode web (Streamlit)
+
+Escreves no terminal o prompt abaixo
+
+´´´bash
+streamlit run app_geo.py
+´´´
+
+### Modo Terminal (CLI)
+
+Escreves no terminal o prompt abaixo
+
+´´´bash
+python motor.py
+´´´
+
 
 ## 👥 Autores
 - Alexandre Pereira — Nº 119871
