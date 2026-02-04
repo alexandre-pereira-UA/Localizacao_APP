@@ -1,6 +1,6 @@
 # 🌍 GeoFinder Pro
 
-O **GeoFinder Pro** é uma aplicação avançada de geolocalização que permite descobrir pontos de interesse em qualquer parte do mundo, fornecendo dados contextuais ricos como hora local, moeda, capital e visualização interativa em mapas.
+O **GeoFinder Pro** é uma aplicação de geolocalização que permite descobrir pontos de interesse em qualquer parte do mundo, fornecendo dados contextuais ricos como hora local, moeda, capital e visualização interativa em mapas.
 
 ---
 
@@ -37,3 +37,7 @@ Executa o seguinte comando para instalar todas as dependências:
 
 ```bash
 pip install streamlit requests pandas folium streamlit-folium timezonefinder countryinfo pycountry pytz
+
+## 🎓 Autores
+- **Nome:** Alexandre Pereira **NMEC:** 119871
+- **Nome:** Alexandre Ferreira **NMEC:** 120527 
