@@ -37,7 +37,8 @@ Executa o seguinte comando para instalar todas as dependências:
 
 ```bash
 pip install streamlit requests pandas folium streamlit-folium timezonefinder countryinfo pycountry pytz
+```
 
-👥 Autores
-Alexandre Pereira — Nº 119871
-Alexandre Ferreira — Nº 120527
+## 👥 Autores
+- Alexandre Pereira — Nº 119871
+- Alexandre Ferreira — Nº 120527
