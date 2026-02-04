@@ -57,18 +57,18 @@ pip install streamlit requests pandas folium streamlit-folium timezonefinder cou
 
 Escreves no terminal o prompt abaixo
 
-´´´bash
+```bash
 streamlit run app_geo.py
-´´´
+```
 
 ### Modo Terminal (CLI)
 
 Escreves no terminal o prompt abaixo
 
-´´´bash
+```bash
 python motor.py
-´´´
-
+```
+---
 
 ## 👥 Autores
 - Alexandre Pereira — Nº 119871
