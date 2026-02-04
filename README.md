@@ -38,6 +38,10 @@ Executa o seguinte comando para instalar todas as dependências:
 ```bash
 pip install streamlit requests pandas folium streamlit-folium timezonefinder countryinfo pycountry pytz
 
+```markdown
 ## 🎓 Autores
-- **Nome:** Alexandre Pereira **NMEC:** 119871
-- **Nome:** Alexandre Ferreira **NMEC:** 120527 
+
+| Nome | NMEC |
+| :--- | :--- |
+| Alexandre Pereira | 119871 |
+| Alexandre Ferreira | 120527 |
